@@ -1,0 +1,91 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>vue签到项目笔记</title>
+<link rel="stylesheet" media="all" href="http://cdn-qn0.jianshu.io/assets/base-28859e35d389885d08837bc971ff742c.css">
+<link rel="stylesheet" media="all" href="http://cdn-qn0.jianshu.io/assets/writer-0115c67175d681b0ce9facf3c65caf11.css">
+<link rel="stylesheet" media="all" href="http://cdn-qn0.jianshu.io/assets/base-read-mode-64acccf6966299cfa3d580140a2582fe.css">
+</head>
+  <body class="input zh cn win reader-day-mode reader-font2 ">
+    <div id="writer" class="container-fluid" data-writer-version="17">
+    <div class="stack expansion" style="padding-left: 0px;"><div class="row-fluid preview-mode active"><div class="span6 preview" style="width:100%;min-height: 934px;">
+
+
+</div>
+
+
+</div></div></div></div>
+
+<script id="inner" type="text/html">
+<h1 class="title mousetrap">vue签到项目笔记</h1>
+<div class="content mousetrap"><p><strong>访问时项目整体流程：</strong></p>
+<ul>
+<li><p>1、后端处理<br>先是后端的各种处理、然后到<strong>后端路由</strong>，访问<strong><code>membersign.html</code></strong>时将会转跳到<code>web</code>下的<code>views</code>下的<code>newMemberSign</code>下的<strong><code>Index</code></strong>，然后<code>index</code><strong>引用了<code>dist</code>下的编译后的</strong><code>app.js</code><strong>，进入签到项目的单页入口</strong></p>
+</li>
+<li><p>2、单页入口app.js<br><code>import</code>加载各种模块引用，然后注册组件</p>
+<pre class="hljs cs"><code class="cs">Vue.component(<span class="hljs-string">"load"</span>, load);   <span class="hljs-comment">//注册小鱼loading</span>
+Vue.component(<span class="hljs-string">"tab-component"</span>, tabComponent);<span class="hljs-comment">//底部切换组件</span>
+<span class="hljs-keyword">var</span> app = <span class="hljs-keyword">new</span> Vue({el:<span class="hljs-string">'#app'</span>,data:…,methods:…,beforeCompile:…})<span class="hljs-comment">//全局级的主容器组件</span></code></pre>
+<p>其中<code>app</code>里的<code>data</code>储存着主容器的各种变量，<code>methods</code>封装了各种方法<br>组件即将被初始化时自动调用<code>beforeCompile</code>方法<br>其中的方法主要是用于初始化手机页面的设置，以及检验是否登录，在客户端还是浏览器登录<br>之后会执行 <code>(autoLogin)</code>-&gt;<code>ajaxList</code>-&gt;<code>setRouter</code>-&gt;<code>routerConfig(this)</code>//这里的<code>this</code>是<code>app</code><br>其中<code>routerConfig</code> 来自上面的<code>import</code></p>
+<pre class="hljs javascript"><code class="javascript"><span class="hljs-keyword">import</span> routerConfig <span class="hljs-keyword">from</span> <span class="hljs-string">"router"</span>;</code></pre>
+</li>
+<li>3、进入路由<br>所以执行到<code>js/router.js</code>文件，既然是import来的，所以先看这个JS的入口<pre class="hljs javascript"><code class="javascript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">app</span>) \\接收的<span class="hljs-title">app</span>来自上面的<span class="hljs-title">this</span>，也就是大容器组件<span class="hljs-title">app</span>
+</span>{
+  <span class="hljs-keyword">var</span> router = <span class="hljs-keyword">new</span> Router(); \\入口内注册一个<span class="hljs-keyword">new</span> Router()
+  router.on(<span class="hljs-string">"/index"</span>, config.index); \\并用on进行监听hash变化
+  router.on . . . . .</code></pre>
+当<code>url</code>接收到<code>#/index</code>时，触发<code>router.js</code>上面定义的<code>config</code>对象里面封装的方法<pre class="hljs php"><code class="php">index:<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span>
+  </span>{
+      app.currentView = <span class="hljs-string">"load"</span>;<span class="hljs-comment">//加载小鱼loading</span>
+      <span class="hljs-keyword">require</span>.ensure([], <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span>
+      </span>{
+          Vue.component(<span class="hljs-string">"index"</span>, <span class="hljs-keyword">require</span>(<span class="hljs-string">'index'</span>));<span class="hljs-comment">//注册一个index组件，内容来自view/index.vue</span>
+          app.currentView = <span class="hljs-string">"index"</span>;<span class="hljs-comment">//注册此组件的名字，用于日后切换</span>
+          app.setTitle(<span class="hljs-string">"游币玩乐惠"</span>, <span class="hljs-string">"分享"</span>, app.tcShare);<span class="hljs-comment">//设置app顶部titel</span>
+      }, <span class="hljs-string">"index"</span>);<span class="hljs-comment">//编译后的名字为index放到dist文件夹下</span>
+  },</code></pre>
+</li>
+<li>4、渲染vue<br>上面<code>require('index')</code>，所以进入<code>index.vue</code></li>
+</ul>
+待更新. . . . .
+<hr>
+<p><strong>新建时开发流程：</strong></p>
+<p>来做一个test试试看<br>首先进入工作目录<code>D:\Work\TCW\8.Web\TCWireless.Touch.Deal.Web\Script\MemberSign</code><br>然后打开配置好的webpack的.bat文件<code>npm_run_build.bat</code><br>(如果不能运行，请注意<code>node model</code>)</p>
+<ul>
+<li>1、先配置好webpack，打开MemberSign下的webpack.config.js<br>设置好新建文件的别名，如：<pre class="hljs bash"><code class="bash"><span class="hljs-string">'test'</span>:<span class="hljs-string">'view/test'</span> //webpack在require的时候可以直接写<span class="hljs-built_in">test</span>就访问到view下的test.vue文件了</code></pre>
+然后运行.bat文件<code>npm_run_build.bat</code></li>
+<li>2、配置路由：src/router.js添加一个router.on，如：<pre class="hljs coffeescript"><code class="coffeescript">router.<span class="hljs-literal">on</span>(<span class="hljs-string">"/test"</span>,config.test);</code></pre>
+需要页面间穿参数时可以用url，后面加<code>/:</code>，如:<pre class="hljs javascript"><code class="javascript">router.on(<span class="hljs-string">"/test/:tabIndex"</span>,config.test);</code></pre>
+意思是当别人访问/test时，触发上面config对象里面的test函数<br>然后我们在config对象里面添加一个test函数<pre class="hljs php"><code class="php">test: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>{
+      app.currentView = <span class="hljs-string">"load"</span>;
+      <span class="hljs-keyword">require</span>.ensure([], <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span>//写给<span class="hljs-title">webpack</span>用的，新的页面
+      </span>{
+          Vue.component(<span class="hljs-string">"test"</span>, <span class="hljs-keyword">require</span>(<span class="hljs-string">'test'</span>));<span class="hljs-comment">//设置一个test组件，加载来自view下的test.vue(webpack设置的)</span>
+          app.currentView = <span class="hljs-string">"test"</span>;<span class="hljs-comment">//根组件下的属性，用于切换组件</span>
+          app.setTitle(<span class="hljs-string">"历届红人榜"</span>);<span class="hljs-comment">//顶部的名字(封装在app里的方法)</span>
+      }, <span class="hljs-string">"test"</span>);<span class="hljs-comment">//最后编译为test.js放在dist下</span>
+  }</code></pre>
+<code>require('test')</code>要调用<code>test.vue</code>文件了嘛，所以我们开始写<code>test.vue</code></li>
+<li>3、写vue文件<br>所有的vue文件都有相似的结构<pre class="hljs xml"><code class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">style</span> <span class="hljs-attribute">lang</span>=<span class="hljs-value">"sass"</span>&gt;</span><span class="css">
+  <span class="hljs-at_rule">@<span class="hljs-keyword">import</span> <span class="hljs-string">"../css/pxtorem.scss"</span></span>;
+    <span class="hljs-comment">/*sass样式*/</span>
+</span><span class="hljs-tag">&lt;/<span class="hljs-title">style</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">template</span>&gt;</span>
+    <span class="hljs-comment">&lt;!-- html结构 --&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">template</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-title">script</span>&gt;</span><span class="javascript">
+  <span class="hljs-built_in">module</span>.exports={
+     <span class="hljs-comment">//当前组件内容，结构同vue组件</span>
+  }
+&lt;script&gt;</span></code></pre>
+</li>
+</ul>
+</div>
+待更新 . . . . . 
+
+
+
+</script>
+
+<script>
+  document.getElementsByClassName("span6")[0].innerHTML=document.getElementById("inner").innerHTML
+</script>
+</body></html>
